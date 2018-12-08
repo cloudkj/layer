@@ -1,11 +1,6 @@
 (declare (unit core))
 
-(use blas
-     input-parse
-     srfi-1
-     srfi-4
-     srfi-27-distributions
-     srfi-133)
+(use blas input-parse)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Options handling

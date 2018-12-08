@@ -1,6 +1,6 @@
-(include "core.scm")
+(declare (uses core))
 
-(use getopt-long input-parse srfi-4)
+(use getopt-long)
 
 (define options-grammar
   '(;; Required parameters
