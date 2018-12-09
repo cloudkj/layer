@@ -53,14 +53,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Initializes and sets a vector with values, in reverse order
-(define (create-vector values)
-  (let loop ((v (make-f64vector (length values)))
+(define (create-vector values len)
+  (let loop ((v (make-f64vector len))
+             (i (- len 1))
              (vals values))
-    (if (<= (length vals) 0)
+    (if (< i 0)
         v
         (begin
-          (f64vector-set! v (- (length vals) 1) (car vals))
-          (loop v (cdr vals))))))
+          (f64vector-set! v i (car vals))
+          (loop v (- i 1) (cdr vals))))))
 
 (define (f64v-fold f init v)
   (define (helper i accum)

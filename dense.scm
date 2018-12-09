@@ -21,10 +21,11 @@
 (let* ((options (getopt-long (command-line-arguments) options-grammar))
        (bias? (option-exists? 'biases options))
        (_ (read-weights (option-value 'weights options)
-                      (if bias? (option-value 'biases options) #f)))
+                        (if bias? (option-value 'biases options) #f)))
+       (len (length (cdr _)))
        (m (car _))
-       (n (/ (length (cdr _)) m))
-       (w (create-vector (cdr _)))
+       (n (/ len m))
+       (w (create-vector (cdr _) len))
        (activation (activations (option-value 'activation options))))
   (begin
     ;; TODO: remove debugging
