@@ -3,6 +3,21 @@
 (use blas input-parse)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Debugging
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; Prints the 2D representation of a list of values as an h-by-w matrix
+(define (print-2d v h w)
+  (let loop ((vals v)
+             (i 0)
+             (j 0)
+             (s ""))
+    (cond ((>= i h) (print s))
+          ((>= j w) (loop vals (+ i 1) 0 (string-append s "\n")))
+          (else (loop (cdr vals) i (+ j 1)
+                      (string-append s " " (if (= (car vals) 0.0) "_" "x")))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Options handling
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -53,7 +68,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;; Initializes and sets a vector with values, in reverse order
-(define (create-vector values len)
+(define (create-f32vector values len)
+  (let loop ((v (make-f32vector len))
+             (i (- len 1))
+             (vals values))
+    (if (< i 0)
+        v
+        (begin
+          (f32vector-set! v i (car vals))
+          (loop v (- i 1) (cdr vals))))))
+
+(define (create-f64vector values len)
   (let loop ((v (make-f64vector len))
              (i (- len 1))
              (vals values))
