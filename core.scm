@@ -39,6 +39,9 @@
             (f (map string->number (string-split line ",")))
             (read-input f)))))
 
+(define (read-shape str)
+  (map string->number (string-split str ",")))
+
 ;; Returns pair where the first element is the count of number of lines, and
 ;; the second element is the list of numeric values representing the weights.
 (define (read-weights weights biases)

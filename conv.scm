@@ -8,6 +8,15 @@
              (single-char #\w)
              (required #t)
              (value #t))
+    (input-shape "Input shape"
+                 (required #t)
+                 (value #t))
+    (filter-shape "Filter shape"
+                  (required #t)
+                  (value #t))
+    (num-filters "Number of filters"
+                 (required #t)
+                 (value #t))
     ;; Optional parameters
     (biases "Biases file"
             (single-char #\b)
@@ -72,65 +81,37 @@
           (f64vector-set! to (+ offset i) (f64vector-ref from i))
           (loop (+ i 1))))))
 
-;; Extract the weights for the `i`th filter from a flattened weights vector
-(define (filter-weights v i num-filters)
-  (let* ((len (/ (f64vector-length v) num-filters))
-         (output (make-f64vector len)))
-    (let loop ((j 0))
-      (if (>= j len)
-          output
-          (begin
-            (f64vector-set! output j (f64vector-ref v (+ (* j num-filters) i)))
-            (loop (+ j 1)))))))
+(define (convolve xcols wrows input-height input-width filter-height filter-width num-filters)
+  ;; TODO: add padding/stride
+  (let* ((output-height (+ (- input-height filter-height) 1))
+         (output-width (+ (- input-width filter-width) 1))
+         (c (make-f64vector (* output-height output-width num-filters))))
+    (dgemm RowMajor NoTrans NoTrans
+           (* output-height output-width) ;; m
+           num-filters                    ;; n
+           (* filter-height filter-width) ;; k
+           1                              ;; alpha
+           xcols wrows                    ;; a, b (input matrices)
+           0                              ;; beta
+           c)))                           ;; c (output matrix)
 
 (let* ((options (getopt-long (command-line-arguments) options-grammar))
+       ;; Options
+       (input-shape (read-shape (option-value 'input-shape options)))
+       (filter-shape (read-shape (option-value 'filter-shape options)))
+       (num-filters (string->number (option-value 'num-filters options)))
+       ;; Weights
        (_ (read-weights (option-value 'weights options) #f))
        (len (length (cdr _)))
-       (w (create-f64vector (cdr _) len)))
-
-  ;; TODO: from the weights w read in as a flattened vector, extract the specific
-  ;; weights for each filter separately as a vector
-  (let* ((fw (filter-weights w 0 2))
-  ;; TODO: read an input x as flattened vector, and implement `im2col` to extract
-  ;; each patch of FxF size as a vector
-
-  ;; TODO: parameterize hardcoded shape. Shape: 28x28x1
-         (cols (let* ((line (read-line))
-                      (xl (map string->number (string-split line ",")))
-                      (x (apply f64vector xl)))
-                 (print-2d xl 28 28 )
-                 (im2col x 28 28 8 8 ))))
-    (print "field weights: " (f64vector-length fw))
-
-    (print fw)
-    
-    (print "cols: " (f64vector-length cols))
-
-    (print-2d (f64vector->list cols) 21 64)
-    
-    (print-2d
-     (f64vector->list
-      (sgemv RowMajor NoTrans 441 64 1 cols fw 0 (make-f64vector 441)))
-     21 21)
-    
-    (print (sgemv RowMajor NoTrans 441 64 1 cols fw 0 (make-f64vector 441)))
-
-    )
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; Synthetic test case
-  ;; (let* ((x (f64vector 0 0 0 0 0
-  ;;                      0 0 1 0 0
-  ;;                      0 1 1 0 0
-  ;;                      0 1 1 1 0
-  ;;                      0 0 1 0 0))
-  ;;        (cols (im2col x 5 5 3 3)))
-  ;;   (print-2d (f64vector->list x) 5 5)
-  ;;   (print cols)
-  ;;   (print (f64vector-length cols))
-  ;;   (print-2d (f64vector->list cols) 9 9))
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-  ;; TODO: matrix multiply on matrix of input patches with matrix of weights
-  )
+       (w (create-f64vector (cdr _) len))
+       ;; Hyperparameters
+       (input-height (car input-shape))
+       (input-width (cadr input-shape))
+       (filter-height (car filter-shape))
+       (filter-width (cadr filter-shape)))
+  (read-input
+   (lambda (x)
+     (let* ((x (apply f64vector x))
+            (xcols (im2col x input-height input-width filter-height filter-width))
+            (output (convolve xcols w input-height input-width filter-height filter-width num-filters)))
+       (print (f64v-join output  ","))))))
