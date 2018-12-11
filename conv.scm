@@ -27,50 +27,56 @@
                 (required #f)
                 (value #t))))
 
-;; Returns the ith HxW field patch of a flattened vector.
-;; 
 ;; For input shape H x W, field shape FH x FW, padding P, stride S, output shape is:
 ;;
 ;;   output height = (H - FH + 2P) / S + 1
 ;;   output width  = (W - FW + 2P) / S + 1
 ;;
-;; Total number of patches = output height * output width
-(define (im2col v input-height input-width field-height field-width)
-  ;; Offsets go from [0, 0] to [output height, output width]
-  ;; To start, must get values from `field-height` rows
-  ;;   For each row, get values from `field-width` cols
-
-  ;; E.g. offset 0, 0, get a 3x3 patch
-  ;; For column = 0, get subvectors corresponding to row 0, row 1, row 2
-;  (subf64vector v 0 input-width*1)
-;  (subf64vector v input-width*1 input-width*2)
-;  (subf64vector v input-width*2 input-width*3)
-
-  ;; (i, j) are offsets into input matrix for the patch in question
-  (let* ((output-height (+ (- input-height field-height) 1)) ;; TODO: add padding/stride
+;; Total number of fields = output height * output width
+(define (im2col v input-shape field-height field-width bias?)
+  (let* ((bias (if bias? 1 0))
+         (input-height (car input-shape))
+         (input-width (cadr input-shape))
+         ;; Size of each "pixel" is product of remaining dimensions
+         (pixel-size (fold * 1 (cddr input-shape)))
+         ;; Output height and width indicate how many fields "fit" into input
+         (output-height (+ (- input-height field-height) 1)) ;; TODO: add padding/stride
          (output-width (+ (- input-width field-width) 1))
-         (field-size (* field-height field-width))
-         (output (make-f64vector (* output-height output-width field-size) 0)))
+         ;; Number of values in each field, plus bias
+         (field-size (+ bias (* field-height field-width pixel-size)))
+         (output-size (* output-height output-width field-size))
+         (output (make-f64vector output-size 0))) ;; TODO: don't need to initialize to zeros
+    ;; i, j are offsets into the input matrix for each field
     (let outer ((i 0)
                 (j 0))
       (cond ((>= i output-height) output)
             ((>= j output-width) (outer (+ i 1) 0))
             (else
+             ;; Extract values for each field row by row
              (let inner ((row i))
-               (if (>= row (+ i field-height))
-                   (outer i (+ j 1))
-                   (let* (;; First, get subvector corresponding to row
-                          (r (subf64vector v (* input-width row) (* input-width (+ row 1))))
-                          ;; Index into row and get subvector corresponding to columns
-                          (f (subf64vector r j (+ j field-width))))
+               ;; Offset into output based on index of field in output
+               (let ((offset (+ (* i output-width field-size)
+                                (* j field-size))))
+                 (if (>= row (+ i field-height))
                      (begin
-                       (copy-vector! f output
-                                     (+
-                                      ;; Offset into output based on index of field in output
-                                      (+ (* i output-width field-size) (* j field-size))
-                                      ;; Offset into output based on index within field
-                                      (* (- row i) field-height)))
-                       (inner (+ row 1)))))))))))
+                       ;; Set bias once per field, as first value for the field in output
+                       (when bias? (f64vector-set! output offset 1.0))
+                       (outer i (+ j 1)))
+                     (let* (;; First, get subvector corresponding to entire row
+                            (rfrom (* input-width pixel-size row))
+                            (rto   (* input-width pixel-size (+ row 1)))
+                            (r     (subf64vector v rfrom rto))
+                            ;; Second, index into row and get subvector corresponding to columns
+                            (cfrom (* j pixel-size))
+                            (cto   (+ cfrom (* field-width pixel-size)))
+                            (c (subf64vector r cfrom cto))
+                            ;; Offset for copying values into output vector: offset of field in _output_ plus
+                            ;; offset into output based on the index _within_ the field
+                            (offset (+ offset (+ bias (* (- row i) field-height pixel-size)))))
+                       (begin
+                         ;; Copy columns into output vector
+                         (copy-vector! c output offset)
+                         (inner (+ row 1))))))))))))
 
 ;; Copies all values in `from` and sets starting at offset index in `to`
 (define (copy-vector! from to offset)
@@ -81,37 +87,42 @@
           (f64vector-set! to (+ offset i) (f64vector-ref from i))
           (loop (+ i 1))))))
 
-(define (convolve xcols wrows input-height input-width filter-height filter-width num-filters)
+(define (convolve xcols wrows input-shape filter-height filter-width num-filters bias?)
   ;; TODO: add padding/stride
-  (let* ((output-height (+ (- input-height filter-height) 1))
+  (let* ((input-height (car input-shape))
+         (input-width (cadr input-shape))
+         ;; Size of each "pixel" is product of remaining dimensions
+         (pixel-size (fold * 1 (cddr input-shape)))
+         (output-height (+ (- input-height filter-height) 1))
          (output-width (+ (- input-width filter-width) 1))
+         ;; GEMM inputs
+         (m (* output-height output-width))
+         (n num-filters)
+         (k (* filter-height filter-width pixel-size))
+         (k (if bias? (+ k 1) k))
          (c (make-f64vector (* output-height output-width num-filters))))
-    (dgemm RowMajor NoTrans NoTrans
-           (* output-height output-width) ;; m
-           num-filters                    ;; n
-           (* filter-height filter-width) ;; k
-           1                              ;; alpha
-           xcols wrows                    ;; a, b (input matrices)
-           0                              ;; beta
-           c)))                           ;; c (output matrix)
+    (dgemm RowMajor NoTrans NoTrans m n k
+           1           ;; alpha
+           xcols wrows ;; A, B (input matrices)
+           0           ;; beta
+           c)))        ;; C (output matrix)
 
 (let* ((options (getopt-long (command-line-arguments) options-grammar))
        ;; Options
        (input-shape (read-shape (option-value 'input-shape options)))
        (filter-shape (read-shape (option-value 'filter-shape options)))
        (num-filters (string->number (option-value 'num-filters options)))
+       (bias? (option-exists? 'biases options))
        ;; Weights
-       (_ (read-weights (option-value 'weights options) #f))
-       (len (length (cdr _)))
-       (w (create-f64vector (cdr _) len))
+       (_ (read-weights (option-value 'weights options)
+                        (if bias? (option-value 'biases options) #f)))
+       (w (create-f64vector (cdr _) (length (cdr _))))
        ;; Hyperparameters
-       (input-height (car input-shape))
-       (input-width (cadr input-shape))
        (filter-height (car filter-shape))
        (filter-width (cadr filter-shape)))
   (read-input
    (lambda (x)
      (let* ((x (apply f64vector x))
-            (xcols (im2col x input-height input-width filter-height filter-width))
-            (output (convolve xcols w input-height input-width filter-height filter-width num-filters)))
+            (xcols (im2col x input-shape filter-height filter-width bias?))
+            (output (convolve xcols w input-shape filter-height filter-width num-filters bias?)))
        (print (f64v-join output  ","))))))

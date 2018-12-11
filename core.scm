@@ -15,7 +15,13 @@
     (cond ((>= i h) (print s))
           ((>= j w) (loop vals (+ i 1) 0 (string-append s "\n")))
           (else (loop (cdr vals) i (+ j 1)
-                      (string-append s " " (if (= (car vals) 0.0) "_" "x")))))))
+                      (string-append s " "
+                                     (if (= (car vals) 0.0)
+                                         "_"
+                                         (number->string
+                                          (modulo
+                                           (inexact->exact (floor (* 10 (car vals))))
+                                           10)))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Options handling
