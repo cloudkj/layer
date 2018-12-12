@@ -62,6 +62,7 @@
                        ;; Set bias once per field, as first value for the field in output
                        (when bias? (f64vector-set! output offset 1.0))
                        (outer i (+ j 1)))
+                     ;; TODO: perf improvement: directly get columns with 1 subv op rather than 2
                      (let* (;; First, get subvector corresponding to entire row
                             (rfrom (* input-width pixel-size row))
                             (rto   (* input-width pixel-size (+ row 1)))
@@ -119,10 +120,12 @@
        (w (create-f64vector (cdr _) (length (cdr _))))
        ;; Hyperparameters
        (filter-height (car filter-shape))
-       (filter-width (cadr filter-shape)))
+       (filter-width (cadr filter-shape))
+       (activate (activations (option-value 'activation options))))
   (read-input
    (lambda (x)
      (let* ((x (apply f64vector x))
             (xcols (im2col x input-shape filter-height filter-width bias?))
-            (output (convolve xcols w input-shape filter-height filter-width num-filters bias?)))
-       (print (f64v-join output  ","))))))
+            (output (convolve xcols w input-shape filter-height filter-width num-filters bias?))
+            (a (activate output num-filters)))
+       (print (f64v-join a  ","))))))

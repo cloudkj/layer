@@ -126,22 +126,45 @@
 ;; Activations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (relu v)
+(define (relu! v #!optional n)
   (f64v-map! v (lambda (z) (max 0 z))))
 
-(define (sigmoid v)
+(define (sigmoid! v #!optional n)
   (f64v-map! v (lambda (z) (/ 1 (+ 1 (exp (- z)))))))
 
-(define (softmax v)
-  (let* ((numer (f64v-map! (dcopy v) exp))
-         (denom (f64v-fold (lambda (sum x) (+ sum x)) 0 numer)))
-    (f64v-map! numer (lambda (x) (/ x denom)))))
+;; Apply softmax to n elements at a time
+(define (softmax-n! v n)
+  (let loop ((i 0))
+    (if (>= i (f64vector-length v))
+        v
+        ;; Exponentiate each element and sum the values
+        (let ((sum (let expo ((j i)
+                              (sum 0))
+                     (if (>= j (+ i n))
+                         sum
+                         (let ((ej (exp (f64vector-ref v j))))
+                           (f64vector-set! v j ej)
+                           (expo (+ j 1) (+ sum ej)))))))
+          ;; Normalize each element
+          (let normalize ((j i))
+            (if (>= j (+ i n))
+                (loop (+ i n))
+                (begin
+                  (f64vector-set! v j (/ (f64vector-ref v j) sum))
+                  (normalize (+ j 1)))))))))
+
+(define (softmax! v #!optional n)
+  (if n
+      (softmax-n! v n)
+      (let* ((numer (f64v-map! (dcopy v) exp))
+             (denom (f64v-fold (lambda (sum x) (+ sum x)) 0 numer)))
+        (f64v-map! numer (lambda (x) (/ x denom))))))
 
 (define (activations a)
-  (cond ((equal? a "relu") relu)
-        ((equal? a "sigmoid") sigmoid)
-        ((equal? a "softmax") softmax)
-        (else identity)))
+  (cond ((equal? a "relu") relu!)
+        ((equal? a "sigmoid") sigmoid!)
+        ((equal? a "softmax") softmax!)
+        (else (lambda (x #!optional n) x))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Layers
