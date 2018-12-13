@@ -165,15 +165,3 @@
         ((equal? a "sigmoid") sigmoid!)
         ((equal? a "softmax") softmax!)
         (else (lambda (x #!optional n) x))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Layers
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define order RowMajor)
-(define transa Trans)
-(define alpha 1)
-(define beta 0)
-
-(define (forward m n w x y activation)
-  (activation (dgemv order transa m n alpha w x beta y)))

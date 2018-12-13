@@ -37,7 +37,7 @@
   (let* ((bias (if bias? 1 0))
          (input-height (car input-shape))
          (input-width (cadr input-shape))
-         ;; Size of each "pixel" is product of remaining dimensions
+         ;; Size of each "pixel" is product of remaining input dimensions
          (pixel-size (fold * 1 (cddr input-shape)))
          ;; Output height and width indicate how many fields "fit" into input
          (output-height (+ (- input-height field-height) 1)) ;; TODO: add padding/stride
@@ -52,11 +52,11 @@
       (cond ((>= i output-height) output)
             ((>= j output-width) (outer (+ i 1) 0))
             (else
-             ;; Extract values for each field row by row
-             (let inner ((row i))
-               ;; Offset into output based on index of field in output
-               (let ((offset (+ (* i output-width field-size)
-                                (* j field-size))))
+             ;; Offset into output vector based on index of field in output
+             (let ((offset (+ (* i output-width field-size)
+                              (* j field-size))))
+               ;; Extract values for each field row by row
+               (let inner ((row i))
                  (if (>= row (+ i field-height))
                      (begin
                        ;; Set bias once per field, as first value for the field in output
@@ -101,7 +101,7 @@
          (n num-filters)
          (k (* filter-height filter-width pixel-size))
          (k (if bias? (+ k 1) k))
-         (c (make-f64vector (* output-height output-width num-filters))))
+         (c (make-f64vector (* m n))))
     (dgemm RowMajor NoTrans NoTrans m n k
            1           ;; alpha
            xcols wrows ;; A, B (input matrices)
@@ -124,7 +124,7 @@
        (activate (activations (option-value 'activation options))))
   (read-input
    (lambda (x)
-     (let* ((x (apply f64vector x))
+     (let* ((x (create-f64vector x (length x)))
             (xcols (im2col x input-shape filter-height filter-width bias?))
             (output (convolve xcols w input-shape filter-height filter-width num-filters bias?))
             (a (activate output num-filters)))
