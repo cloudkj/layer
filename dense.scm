@@ -64,7 +64,7 @@
        ;; Weights
        (_ (read-weights (option-value 'weights options)
                         (if bias? (option-value 'biases options) #f)))
-       (w (create-f64vector (cdr _) (length (cdr _))))
+       (w (create-f64vector-reverse (cdr _) (length (cdr _))))
         ;; Number of neurons, inferred from input shape and weights
        (num-neurons (/ (f64vector-length w) (if bias? (+ 1 (last input-shape)) (last input-shape))))
        (activate (activations (option-value 'activation options))))
@@ -78,4 +78,4 @@
        (let* ((x (create-input x input-shape bias?))
               (output (forward x w input-shape num-neurons bias?))
               (a (activate output num-neurons)))
-         (print (f64v-join a ",")))))))
+         (print-output a ","))))))

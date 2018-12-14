@@ -117,7 +117,7 @@
        ;; Weights
        (_ (read-weights (option-value 'weights options)
                         (if bias? (option-value 'biases options) #f)))
-       (w (create-f64vector (cdr _) (length (cdr _))))
+       (w (create-f64vector-reverse (cdr _) (length (cdr _))))
        ;; Hyperparameters
        (filter-height (car filter-shape))
        (filter-width (cadr filter-shape))
@@ -128,4 +128,4 @@
             (xcols (im2col x input-shape filter-height filter-width bias?))
             (output (convolve xcols w input-shape filter-height filter-width num-filters bias?))
             (a (activate output num-filters)))
-       (print (f64v-join a  ","))))))
+       (print-output a ",")))))

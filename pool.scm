@@ -80,4 +80,4 @@
    (lambda (x)
      (let* ((x (create-f64vector x (length x)))
             (output (pool x input-shape filter-shape stride)))
-       (print (f64v-join output ","))))))
+       (print-output output ",")))))

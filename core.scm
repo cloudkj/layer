@@ -38,6 +38,16 @@
 ;; I/O
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define (print-output v separator)
+  (let ((len (f64vector-length v)))
+    (let loop ((i 0))
+      (if (>= i len)
+          (display #\newline)
+          (begin
+            (when (> i 0) (display separator))
+            (display (f64vector-ref v i))
+            (loop (+ i 1)))))))
+
 (define (read-input f)
   (let ((line (read-line)))
     (when (not (eof-object? line))
@@ -76,18 +86,19 @@
 ;; Vectors
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;; Initializes and sets a vector with values, in reverse order
-(define (create-f32vector values len)
-  (let loop ((v (make-f32vector len))
-             (i (- len 1))
+;; Initializes and sets a vector with values
+(define (create-f64vector values len)
+  (let loop ((v (make-f64vector len))
+             (i 0)
              (vals values))
-    (if (< i 0)
+    (if (>= i len)
         v
         (begin
-          (f32vector-set! v i (car vals))
-          (loop v (- i 1) (cdr vals))))))
+          (f64vector-set! v i (car vals))
+          (loop v (+ i 1) (cdr vals))))))
 
-(define (create-f64vector values len)
+;; Initializes and sets a vector with values, in reverse order
+(define (create-f64vector-reverse values len)
   (let loop ((v (make-f64vector len))
              (i (- len 1))
              (vals values))
