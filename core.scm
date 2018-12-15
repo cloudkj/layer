@@ -3,27 +3,6 @@
 (use blas input-parse)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Debugging
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; Prints the 2D representation of a list of values as an h-by-w matrix
-(define (print-2d v h w)
-  (let loop ((vals v)
-             (i 0)
-             (j 0)
-             (s ""))
-    (cond ((>= i h) (print s))
-          ((>= j w) (loop vals (+ i 1) 0 (string-append s "\n")))
-          (else (loop (cdr vals) i (+ j 1)
-                      (string-append s " "
-                                     (if (= (car vals) 0.0)
-                                         "_"
-                                         (number->string
-                                          (modulo
-                                           (inexact->exact (floor (* 10 (car vals))))
-                                           10)))))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Options handling
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
