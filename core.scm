@@ -51,8 +51,17 @@
          ;; Append biases to end of since values are in reverse order
          ;; TODO: assert `biases` is of shape 1xC where C is number of columns in `weights`
          ;; TODO: assert count of biases = 1
-         (w (if biases (append w (read (open-input-file biases))) w)))
-    (create-f64vector-reverse w (length w))))
+         (w (if biases (append w (read (open-input-file biases))) w))
+         (len (length w)))
+    ;; Initialize and set a vector with weights in reverse order
+    (let loop ((v (make-f64vector len))
+               (i (- len 1))
+               (vals w))
+      (if (< i 0)
+          v
+          (begin
+            (f64vector-set! v i (car vals))
+            (loop v (- i 1) (cdr vals)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vectors
@@ -68,17 +77,6 @@
         (begin
           (f64vector-set! v i (car vals))
           (loop v (+ i 1) (cdr vals))))))
-
-;; Initializes and sets a vector with values, in reverse order
-(define (create-f64vector-reverse values len)
-  (let loop ((v (make-f64vector len))
-             (i (- len 1))
-             (vals values))
-    (if (< i 0)
-        v
-        (begin
-          (f64vector-set! v i (car vals))
-          (loop v (- i 1) (cdr vals))))))
 
 (define (f64v-fold f init v)
   (define (helper i accum)

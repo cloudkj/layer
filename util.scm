@@ -5,7 +5,7 @@
 ;;; Logging
 
 ;; Logs a varadic list of values by printing to stderr
-(define (log . args)
+(define (util-log . args)
   (let ((port (current-error-port)))
     (let loop ((a args))
       (if (= (length a) 0)
@@ -16,7 +16,7 @@
             (loop (cdr a)))))))
 
 ;; Logs the 2D representation of a list of numeric values as an h-by-w matrix
-(define (log-list-as-matrix v h w)
+(define (util-log-list-as-matrix v h w)
   (let loop ((vals v)
              (i 0)
              (j 0)

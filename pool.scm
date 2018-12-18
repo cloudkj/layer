@@ -1,24 +1,4 @@
-(include "core.scm")
-
-(use getopt-long)
-
-(define options-grammar
-  '(;; Required parameters
-    (input-shape "Input shape"
-                 (required #t)
-                 (value #t))
-    (filter-shape "Filter shape"
-                  (required #t)
-                  (value #t))
-    (pooling "Pooling function"
-             (single-char #\p)
-             (required #t)
-             (value #t))
-    ;; Optional parameters
-    (stride "Stride"
-            (single-char #\s)
-            (required #f)
-            (value #t))))
+(declare (unit pool))
 
 (define (poolings p)
   (cond ((equal? p "max") max)
@@ -26,7 +6,7 @@
         (else #f)))
 
 ;; TODO: implement padding
-(define (pool v input-shape filter-shape stride)
+(define (pooling v input-shape filter-shape stride)
   (let* ((input-height (car input-shape))
          (input-width (cadr input-shape))
          ;; Input shape must be of three dimensions
@@ -68,16 +48,13 @@
                                            k)))
                                (inner row (+ col 1) (cons (f64vector-ref v index) vals))))))))))))
 
-(let* ((options (getopt-long (command-line-arguments) options-grammar))
-       ;; Options
-       (input-shape (read-shape (option-value 'input-shape options)))
-       (filter-shape (read-shape (option-value 'filter-shape options)))
-       (pooling (poolings (option-value 'pooling options)))
-       (stride (if (option-exists? 'stride options)
-                   (string->number (option-value 'stride options))
-                   1)))
-  (read-input
-   (lambda (x)
-     (let* ((x (create-f64vector x (length x)))
-            (output (pool x input-shape filter-shape stride)))
-       (print-output output ",")))))
+(define (pool options-lookup)
+  (let* ((input-shape (read-shape (options-lookup input-shape-option)))
+         (filter-shape (read-shape (options-lookup filter-shape-option)))
+         (p (poolings (options-lookup function-option)))
+         (stride (options-lookup stride-option 1 string->number)))
+    (read-input
+     (lambda (x)
+       (let* ((x (create-f64vector x (length x)))
+              (output (pooling x input-shape filter-shape stride)))
+         (print-output output ","))))))

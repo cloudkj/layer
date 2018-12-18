@@ -1,25 +1,7 @@
-(declare (uses core))
+(declare (unit dense)
+         (uses options))
 
-(use blas getopt-long)
-
-(define options-grammar
-  '(;; Required parameters
-    (weights "Weights file"
-             (single-char #\w)
-             (required #t)
-             (value #t))
-    (input-shape "Input shape"
-                 (required #t)
-                 (value #t))
-    ;; Optional parameters
-    (biases "Biases file"
-            (single-char #\b)
-            (required #f)
-            (value #t))
-    (activation "Activation function"
-                (single-char #\a)
-                (required #f)
-                (value #t))))
+(use blas)
 
 (define (create-input x input-shape bias?)
   (let ((len (length x)))
@@ -57,24 +39,23 @@
            0    ;; beta
            c))) ;; C (output matrix
 
-(let* ((options (getopt-long (command-line-arguments) options-grammar))
-       ;; Options
-       (input-shape (read-shape (option-value 'input-shape options)))
-       (bias? (option-exists? 'biases options))
-       ;; Weights
-       (w (read-weights (option-value 'weights options)
-                        (if bias? (option-value 'biases options) #f)))
-        ;; Number of neurons, inferred from input shape and weights
-       (num-neurons (/ (f64vector-length w) (if bias? (+ 1 (last input-shape)) (last input-shape))))
-       (activate (activations (option-value 'activation options))))
-  (begin
-    ;; TODO: remove debugging
-    (format (current-error-port) "activation: ~A\n" activate)
-    (format (current-error-port) "neurons: ~A\n" num-neurons)
-    ;; TODO: add assertions on input size versus dimensions of weights
-    (read-input
-     (lambda (x)
-       (let* ((x (create-input x input-shape bias?))
-              (output (forward x w input-shape num-neurons bias?))
-              (a (activate output num-neurons)))
-         (print-output a ","))))))
+(define (dense options-lookup)
+  (let* ((input-shape (read-shape (options-lookup input-shape-option)))
+         (weights (options-lookup weights-option))
+         (biases (options-lookup biases-option))
+         ;; Weights
+         (w (read-weights weights biases))
+         ;; Number of neurons, inferred from input shape and weights
+         (num-neurons (/ (f64vector-length w)
+                         (if biases (+ 1 (last input-shape)) (last input-shape))))
+         (activate (activations (options-lookup function-option))))
+    (begin
+      ;; TODO: remove debugging
+      (util-log "activation:" activate "neurons:" num-neurons)
+      ;; TODO: add assertions on input size versus dimensions of weights
+      (read-input
+       (lambda (x)
+         (let* ((x (create-input x input-shape biases))
+                (output (forward x w input-shape num-neurons biases))
+                (a (activate output num-neurons)))
+           (print-output a ",")))))))

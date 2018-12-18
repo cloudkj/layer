@@ -1,31 +1,6 @@
-(include "core.scm")
+(declare (unit conv))
 
-(use getopt-long)
-
-(define options-grammar
-  '(;; Required parameters
-    (weights "Weights file"
-             (single-char #\w)
-             (required #t)
-             (value #t))
-    (input-shape "Input shape"
-                 (required #t)
-                 (value #t))
-    (filter-shape "Filter shape"
-                  (required #t)
-                  (value #t))
-    (num-filters "Number of filters"
-                 (required #t)
-                 (value #t))
-    ;; Optional parameters
-    (biases "Biases file"
-            (single-char #\b)
-            (required #f)
-            (value #t))
-    (activation "Activation function"
-                (single-char #\a)
-                (required #f)
-                (value #t))))
+(use blas)
 
 ;; For input shape H x W, field shape FH x FW, padding P, stride S, output shape is:
 ;;
@@ -108,23 +83,22 @@
            0           ;; beta
            c)))        ;; C (output matrix)
 
-(let* ((options (getopt-long (command-line-arguments) options-grammar))
-       ;; Options
-       (input-shape (read-shape (option-value 'input-shape options)))
-       (filter-shape (read-shape (option-value 'filter-shape options)))
-       (num-filters (string->number (option-value 'num-filters options)))
-       (bias? (option-exists? 'biases options))
-       ;; Weights
-       (w (read-weights (option-value 'weights options)
-                        (if bias? (option-value 'biases options) #f)))
-       ;; Hyperparameters
-       (filter-height (car filter-shape))
-       (filter-width (cadr filter-shape))
-       (activate (activations (option-value 'activation options))))
-  (read-input
-   (lambda (x)
-     (let* ((x (create-f64vector x (length x)))
-            (xcols (im2col x input-shape filter-height filter-width bias?))
-            (output (convolve xcols w input-shape filter-height filter-width num-filters bias?))
-            (a (activate output num-filters)))
-       (print-output a ",")))))
+(define (conv options-lookup)
+  (let* ((input-shape (read-shape (options-lookup input-shape-option)))
+         (filter-shape (read-shape (options-lookup filter-shape-option)))
+         (num-filters (string->number (options-lookup num-filters-option)))
+         (weights (options-lookup weights-option))
+         (biases (options-lookup biases-option))
+         ;; Weights
+         (w (read-weights weights biases))
+         ;; Hyperparameters
+         (filter-height (car filter-shape))
+         (filter-width (cadr filter-shape))
+         (activate (activations (options-lookup function-option))))
+    (read-input
+     (lambda (x)
+       (let* ((x (create-f64vector x (length x)))
+              (xcols (im2col x input-shape filter-height filter-width biases))
+              (output (convolve xcols w input-shape filter-height filter-width num-filters biases))
+              (a (activate output num-filters)))
+         (print-output a ","))))))

@@ -17,9 +17,9 @@ function compare {
     fi
 }
 
-layer0="csi -script conv.scm -w test/weights.keras_cifar10_cnn.0.csv -b test/biases.keras_cifar10_cnn.0.csv --input-shape=32,32,3  --filter-shape=3,3 --num-filters=32 -a relu"
-layer1="csi -script conv.scm -w test/weights.keras_cifar10_cnn.1.csv -b test/biases.keras_cifar10_cnn.1.csv --input-shape=30,30,32 --filter-shape=3,3 --num-filters=32 -a relu"
-layer2="csi -script pool.scm --input-shape=28,28,32 --filter-shape=2,2 --stride=2 -p max"
+layer0="./main conv -w test/weights.keras_cifar10_cnn.0.csv -b test/biases.keras_cifar10_cnn.0.csv --input-shape=32,32,3  --filter-shape=3,3 --num-filters=32 -f relu"
+layer1="./main conv -w test/weights.keras_cifar10_cnn.1.csv -b test/biases.keras_cifar10_cnn.1.csv --input-shape=30,30,32 --filter-shape=3,3 --num-filters=32 -f relu"
+layer2="./main pool --input-shape=28,28,32 --filter-shape=2,2 --stride=2 -f max"
 
 echo "Testing layer 0: $layer0"
 expected0="1.0120909214019775,1.147718906402588,1.0172796249389648,0.9844224452972412,0.9614372849464417,0.9269811511039734,1.0560033321380615,0.9415908455848694,0.9388472437858582,0.9979854226112366,1.2195137739181519,1.1848801374435425,0.7960367798805237,0.8459836840629578,0.7911198139190674,1.0223075151443481,0.8284748792648315,0.7534469962120056,0.7680479288101196,0.6511459946632385"
