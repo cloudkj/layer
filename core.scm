@@ -37,29 +37,22 @@
 (define (read-shape str)
   (map string->number (string-split str ",")))
 
-;; Returns pair where the first element is the count of number of lines, and
-;; the second element is the list of numeric values representing the weights.
+;; Returns a numeric vector of the weights, and optionally biases, in the given
+;; input files.
 (define (read-weights weights biases)
   (define (read port)
-    (let loop ((count 0)
-               (values '()))
+    (let loop ((values '()))
       (let ((token (string->number (next-token '() '(#\, #\newline *eof*) "" port)))
             (c (read-char port)))
-        (cond ((eof-object? c) (cons count values))
-              ((equal? c #\,)
-               (loop count (cons token values)))
-              (else
-               (loop (+ count 1) (cons token values)))))))
-  (if biases
-      (let* ((b (read (open-input-file biases)))
-             (w (read (open-input-file weights)))
-             (count (+ (car w) (car b)))
-             ;; Append biases to end of since values are in reverse order
-             (values (append (cdr w) (cdr b))))
-        ;; TODO: assert `biases` is of shape 1xC where C is number of columns in `weights`
-        ;; TODO: assert count of biases = 1
-        (cons count values))
-      (read (open-input-file weights))))
+        (if (eof-object? c)
+            values
+            (loop (cons token values))))))
+  (let* ((w (read (open-input-file weights)))
+         ;; Append biases to end of since values are in reverse order
+         ;; TODO: assert `biases` is of shape 1xC where C is number of columns in `weights`
+         ;; TODO: assert count of biases = 1
+         (w (if biases (append w (read (open-input-file biases))) w)))
+    (create-f64vector-reverse w (length w))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Vectors
@@ -93,14 +86,6 @@
         accum
         (helper (+ i 1) (f accum (f64vector-ref v i)))))
   (helper 0 init))
-
-(define (f64v-join v separator)
-  (f64v-fold (lambda (res val)
-               (if (> (string-length res) 0)
-                   (string-append res separator (number->string val))
-                   (string-append res (number->string val))))
-             ""
-             v))
 
 ;; TODO: change param order
 ;; TODO: make choice between pure/destructive vector ops, trade off efficiency

@@ -115,9 +115,8 @@
        (num-filters (string->number (option-value 'num-filters options)))
        (bias? (option-exists? 'biases options))
        ;; Weights
-       (_ (read-weights (option-value 'weights options)
+       (w (read-weights (option-value 'weights options)
                         (if bias? (option-value 'biases options) #f)))
-       (w (create-f64vector-reverse (cdr _) (length (cdr _))))
        ;; Hyperparameters
        (filter-height (car filter-shape))
        (filter-width (cadr filter-shape))
