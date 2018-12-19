@@ -2,7 +2,7 @@
 
 (use getopt-long)
 
-(define program "main")
+(define program "layer")
 
 (define commands
   (list (list "dense" weighted-layer-options dense)
