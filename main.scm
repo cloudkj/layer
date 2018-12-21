@@ -5,20 +5,25 @@
 (define program "layer")
 
 (define commands
-  (list (list "dense" weighted-layer-options dense)
-        (list "conv"  conv-layer-options     conv)
-        (list "pool"  pool-layer-options     pool)))
+  (sort (list (list "dense" "Fully connected layer" weighted-layer-options dense)
+              (list "conv"  "2-D convolution layer" conv-layer-options     conv)
+              (list "pool"  "2-D pooling layer"     pool-layer-options     pool))
+        (lambda (a b) (string< (car a) (car b)))))
 
 (define (print-command-usage command #!optional error)
   (when error (print error))
-  (format #t "Usage: ~A ~A [options]\n\n" program command)
-  (print "Options:")
-  (print (usage (cadr (assoc command commands)))))
+  (let* ((def (assoc command commands))
+         (desc (cadr def))
+         (grammar (caddr def)))
+    (format #t "Usage: ~A ~A [options]\n\n~A.\n\n" program command desc)
+    (print "Options:")
+    (print (usage grammar))))
 
 (define (print-usage #!optional error)
   (when error (begin (print error) (newline)))
   (format #t "Usage: ~A command [options]\n\n" program)
-  (print "Commands:"))
+  (print "Commands:")
+  (for-each (lambda (c) (print "  " (car c) "\t\t" (cadr c))) commands))
 
 (define (parse-options command args grammar)
   (handle-exceptions
@@ -48,8 +53,8 @@
         ((and (> (length args) 1) (help? (cadr args))) ;; Command usage
          (print-command-usage command))
         (else
-         (let* ((grammar (cadr def))
-                (f (caddr def))
+         (let* ((grammar (caddr def))
+                (f (cadddr def))
                 (options (parse-options command args grammar)))
            (when options
                  (f (make-options-lookup options)))))))
