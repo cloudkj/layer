@@ -2,7 +2,7 @@ VERSION?=0.1.0
 
 main: *.scm
 	csc -c core.scm options.scm util.scm conv.scm dense.scm pool.scm
-	csc main.scm core.o options.o util.o conv.o dense.o pool.o -o main
+	csc main.scm core.o options.o util.o conv.o dense.o pool.o -o layer
 
 deploy: *.scm
 	csc -deploy *.scm -o build
@@ -12,4 +12,4 @@ deploy: *.scm
 	tar czf layer-$(VERSION).tar.gz layer-$(VERSION)
 
 clean:
-	rm -rf main *.o
+	rm -rf layer *.o
