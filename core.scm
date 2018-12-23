@@ -105,6 +105,11 @@
 (define (sigmoid! v #!optional n)
   (f64v-map! v (lambda (z) (/ 1 (+ 1 (exp (- z)))))))
 
+(define (tanh! v #!optional n)
+  (f64v-map! v (lambda (z)
+                 (let ((e^2z (exp (* 2 z))))
+                   (/ (- e^2z 1) (+ e^2z 1))))))
+
 ;; Apply softmax to n elements at a time
 (define (softmax-n! v n)
   (let loop ((i 0))
@@ -137,4 +142,5 @@
   (cond ((equal? a "relu") relu!)
         ((equal? a "sigmoid") sigmoid!)
         ((equal? a "softmax") softmax!)
+        ((equal? a "tanh") tanh!)
         (else (lambda (x #!optional n) x))))
