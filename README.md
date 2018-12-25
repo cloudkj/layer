@@ -1,6 +1,6 @@
 # layer - neural network inference from the command line
 
-**`layer`** is a program for doing neural network inference the Unix way. Many
+`layer` is a program for doing neural network inference the Unix way. Many
 modern neural network operations are sequential, unidirectional streams of data
 processed by pipelines of filters. The computations at each layer in these
 neural networks are equivalent to an invocation of the program, and multiple
@@ -8,16 +8,13 @@ invocations can be chained together to represent the entirety of these neural
 networks.
 
 `layer` applies the Unix philosophy to neural network inference. Each type of
-a neural network layer is a distinct `layer` subcommand. Simple text streams of
+a neural network layer is a distinct subcommand. Simple text streams of
 delimited numeric values serve as the interface between different layers of a
 neural network. Each invocation of `layer` does one thing: it feeds the numeric
 input values forward through an instantiation of a neural network layer, then
 emits the resulting numeric values.
 
-`layer` is currently implemented as a proof-of-concept and supports a limited
-number of neural network layer types. The types of layers are currently limited
-to feed-forward layers that fit into the model of sequential, unidirectional
-stream processing pipelines.
+## Installation
 
 ## Example
 
@@ -42,7 +39,16 @@ A multi-layer perceptron for XOR.
 0.0111237568184365
 ```
 
-## Installation
+## Documentation
+
+`layer` is currently implemented as a proof-of-concept and supports a limited
+number of neural network layer types. The types of layers are currently limited
+to feed-forward layers that can be modeled as sequential, unidirectional
+pipelines.
+
+Input values, weights and biases for parameterized layers, and output values
+are all read and written in [row-major order](https://en.wikipedia.org/wiki/Row-_and_column-major_order),
+based on the shape parameters specified for each layer.
 
 ## License
 
