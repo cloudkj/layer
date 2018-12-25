@@ -21,16 +21,16 @@ emits the resulting numeric values.
 A multi-layer perceptron for XOR.
 
 ```shell
-% # Fully connected layer with three neurons
-% echo "-2.35546875,-2.38671875,3.63671875,3.521484375,-2.255859375,-2.732421875" > layer1.weights
-% echo "0.7958984375,0.291259765625,1.099609375" > layer1.biases
-%
-% # Fully connected layer with one neuron
-% echo "-5.0625,-3.515625,-5.0625" > layer2.weights
-% echo "1.74609375" > layer2.biases
-%
-% # Compute XOR for all possible binary inputs
-% echo "0,0\n0,1\n1,0\n1,1" \
+$ # Fully connected layer with three neurons
+echo "-2.35546875,-2.38671875,3.63671875,3.521484375,-2.255859375,-2.732421875" > layer1.weights
+echo "0.7958984375,0.291259765625,1.099609375" > layer1.biases
+
+$ # Fully connected layer with one neuron
+echo "-5.0625,-3.515625,-5.0625" > layer2.weights
+echo "1.74609375" > layer2.biases
+
+$ # Compute XOR for all possible binary inputs
+echo -e "0,0\n0,1\n1,0\n1,1" \
     | ./layer dense -w layer1.weights -b layer1.biases --input-shape=2 -f tanh \
     | ./layer dense -w layer2.weights -b layer2.biases --input-shape=3 -f sigmoid
 0.00129012749948779
