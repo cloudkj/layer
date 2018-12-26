@@ -1,15 +1,20 @@
 VERSION?=0.1.0
 
-main: *.scm
-	csc -c core.scm options.scm util.scm conv.scm dense.scm pool.scm
-	csc main.scm core.o options.o util.o conv.o dense.o pool.o -o layer
+PROGRAM_NAME=layer
 
-deploy: *.scm
-	csc -deploy *.scm -o build
-	chicken-install -deploy -p build blas getopt-long input-parse
-	mv build/build build/layer
-	mv build layer-$(VERSION)
-	tar czf layer-$(VERSION).tar.gz layer-$(VERSION)
+SRC_DIR=src
+BUILD_DIR=build
+
+development:
+	csc $(SRC_DIR)/*.scm -o $(PROGRAM_NAME)
+
+deployment:
+	mkdir -p $(BUILD_DIR)
+	csc -deploy $(SRC_DIR)/*.scm -o $(BUILD_DIR)/$@
+	chicken-install -deploy -p $(BUILD_DIR)/$@ blas getopt-long input-parse
+	mv $(BUILD_DIR)/$@/$@ $(BUILD_DIR)/$@/$(PROGRAM_NAME)
+	mv $(BUILD_DIR)/$@ $(BUILD_DIR)/$(PROGRAM_NAME)-$(VERSION)
+	tar czf $(BUILD_DIR)/$(PROGRAM_NAME)-$(VERSION).tar.gz -C $(BUILD_DIR) $(PROGRAM_NAME)-$(VERSION)
 
 clean:
-	rm -rf layer *.o
+	rm -rf $(BUILD_DIR) $(PROGRAM_NAME) *.o
