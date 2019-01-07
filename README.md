@@ -1,11 +1,11 @@
 # layer - neural network inference from the command line
 
 `layer` is a program for doing neural network inference the Unix way. Many
-modern neural network operations are sequential, unidirectional streams of data
-processed by pipelines of filters. The computations at each layer in these
-neural networks are equivalent to an invocation of the program, and multiple
-invocations can be chained together to represent the entirety of these neural
-networks.
+modern neural network operations can be represented as sequential,
+unidirectional streams of data processed by pipelines of [filters](https://en.wikipedia.org/wiki/Filter_(software)).
+The computations at each layer in these neural networks are equivalent to an
+invocation of the `layer` program, and multiple invocations can be chained
+together to represent the entirety of such networks.
 
 `layer` applies the Unix philosophy to neural network inference. Each type of
 a neural network layer is a distinct subcommand. Simple text streams of
@@ -52,4 +52,4 @@ based on the shape parameters specified for each layer.
 
 ## License
 
-Copyright © 2018
+Copyright © 2018-2019
