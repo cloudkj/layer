@@ -1,4 +1,5 @@
-(declare (unit conv))
+(declare (unit convolutional)
+         (uses core functions options vectors))
 
 (use blas)
 
@@ -83,7 +84,7 @@
            0           ;; beta
            c)))        ;; C (output matrix)
 
-(define (conv options-lookup)
+(define (convolutional options-lookup)
   (let* ((input-shape (read-shape (options-lookup input-shape-option)))
          (filter-shape (read-shape (options-lookup filter-shape-option)))
          (num-filters (string->number (options-lookup num-filters-option)))

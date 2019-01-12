@@ -1,4 +1,5 @@
-(declare (unit pool))
+(declare (unit pooling)
+         (uses core options vectors))
 
 (define (poolings p)
   (cond ((equal? p "max") max)
@@ -6,7 +7,7 @@
         (else #f)))
 
 ;; TODO: implement padding
-(define (pooling v input-shape filter-shape stride)
+(define (pool v input-shape filter-shape stride)
   (let* ((input-height (car input-shape))
          (input-width (cadr input-shape))
          ;; Input shape must be of three dimensions
@@ -48,7 +49,7 @@
                                            k)))
                                (inner row (+ col 1) (cons (f64vector-ref v index) vals))))))))))))
 
-(define (pool options-lookup)
+(define (pooling options-lookup)
   (let* ((input-shape (read-shape (options-lookup input-shape-option)))
          (filter-shape (read-shape (options-lookup filter-shape-option)))
          (p (poolings (options-lookup function-option)))
@@ -56,5 +57,5 @@
     (read-input
      (lambda (x)
        (let* ((x (create-f64vector x (length x)))
-              (output (pooling x input-shape filter-shape stride)))
+              (output (pool x input-shape filter-shape stride)))
          (print-output output ","))))))

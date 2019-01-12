@@ -31,8 +31,8 @@ echo "1.74609375" > layer2.biases
 
 $ # Compute XOR for all possible binary inputs
 echo -e "0,0\n0,1\n1,0\n1,1" \
-    | ./layer dense -w layer1.weights -b layer1.biases --input-shape=2 -f tanh \
-    | ./layer dense -w layer2.weights -b layer2.biases --input-shape=3 -f sigmoid
+    | ./layer full -w layer1.weights -b layer1.biases --input-shape=2 -f tanh \
+    | ./layer full -w layer2.weights -b layer2.biases --input-shape=3 -f sigmoid
 0.00129012749948779
 0.99147053740106
 0.991243357927591

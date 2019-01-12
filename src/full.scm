@@ -1,5 +1,5 @@
-(declare (unit dense)
-         (uses options))
+(declare (unit full)
+         (uses core functions options vectors))
 
 (use blas)
 
@@ -39,7 +39,7 @@
            0    ;; beta
            c))) ;; C (output matrix
 
-(define (dense options-lookup)
+(define (full options-lookup)
   (let* ((input-shape (read-shape (options-lookup input-shape-option)))
          (weights (options-lookup weights-option))
          (biases (options-lookup biases-option))
@@ -50,8 +50,6 @@
                          (if biases (+ 1 (last input-shape)) (last input-shape))))
          (activate (activations (options-lookup function-option))))
     (begin
-      ;; TODO: remove debugging
-      (util-log "activation:" activate "neurons:" num-neurons)
       ;; TODO: add assertions on input size versus dimensions of weights
       (read-input
        (lambda (x)

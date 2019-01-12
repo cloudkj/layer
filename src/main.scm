@@ -1,4 +1,4 @@
-(declare (uses core options util conv dense pool))
+(declare (uses functions options util convolutional full pooling))
 
 (use getopt-long)
 
@@ -7,9 +7,9 @@
 (define prog-desc "Neural network inference")
 
 (define commands
-  (sort (list (list "dense" "Fully connected layer" weighted-layer-options dense)
-              (list "conv"  "2-D convolution layer" conv-layer-options     conv)
-              (list "pool"  "2-D pooling layer"     pool-layer-options     pool))
+  (sort (list (list "full"          "Fully connected layer"   full-layer-options          full)
+              (list "convolutional" "2-D convolutional layer" convolutional-layer-options convolutional)
+              (list "pooling"       "2-D pooling layer"       pooling-layer-options       pooling))
         (lambda (a b) (string< (car a) (car b)))))
 
 (define (print-command-usage command #!optional error)

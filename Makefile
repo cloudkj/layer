@@ -3,6 +3,7 @@ VERSION?=0.1.0
 PROGRAM_NAME=layer
 
 SRC_DIR=src
+TEST_DIR=test
 BUILD_DIR=build
 
 main:
@@ -16,6 +17,9 @@ deploy:
 	mv $(BUILD_DIR)/$@/$@ $(BUILD_DIR)/$@/$(PROGRAM_NAME)
 	mv $(BUILD_DIR)/$@ $(BUILD_DIR)/$(PROGRAM_NAME)-$(VERSION)
 	tar czf $(BUILD_DIR)/$(PROGRAM_NAME)-$(VERSION).tar.gz -C $(BUILD_DIR) $(PROGRAM_NAME)-$(VERSION)
+
+tests:
+	csi -script $(TEST_DIR)/*.scm
 
 clean:
 	rm -rf $(BUILD_DIR) $(PROGRAM_NAME) *.o

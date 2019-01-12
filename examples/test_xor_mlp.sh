@@ -6,8 +6,8 @@ expected="0.00005472969860420562
 0.00060950592160224915"
 
 printf "0,0\n0,1\n1,0\n1,1" \
-    | ../layer dense -w weights.xor_mlp.0.csv -b biases.xor_mlp.0.csv --input-shape=2 -f tanh \
-    | ../layer dense -w weights.xor_mlp.1.csv -b biases.xor_mlp.1.csv --input-shape=3 -f sigmoid \
+    | ../layer full -w weights.xor_mlp.0.csv -b biases.xor_mlp.0.csv --input-shape=2 -f tanh \
+    | ../layer full -w weights.xor_mlp.1.csv -b biases.xor_mlp.1.csv --input-shape=3 -f sigmoid \
     | xargs printf "%.12f\n" \
     | paste -d- - <(printf "$expected") \
     | bc \

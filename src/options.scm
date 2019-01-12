@@ -1,5 +1,7 @@
 (declare (unit options))
 
+(use srfi-13)
+
 ;;; Definitions of required parameters
 
 (define filter-shape-option
@@ -40,12 +42,14 @@
                               biases-option
                               function-option))))
 
-(define conv-layer-options
+(define full-layer-options weighted-layer-options)
+
+(define convolutional-layer-options
   (sort-options (append weighted-layer-options
                         (list filter-shape-option
                               num-filters-option))))
 
-(define pool-layer-options
+(define pooling-layer-options
   (sort-options (append layer-options
                         (list filter-shape-option
                               function-option

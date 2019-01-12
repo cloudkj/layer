@@ -19,9 +19,9 @@ function compare {
     fi
 }
 
-layer0="../layer dense -w weights.keras_mnist_mlp.0.csv -b biases.keras_mnist_mlp.0.csv --input-shape=784 -f sigmoid"
-layer1="../layer dense -w weights.keras_mnist_mlp.1.csv -b biases.keras_mnist_mlp.1.csv --input-shape=32  -f relu"
-layer2="../layer dense -w weights.keras_mnist_mlp.2.csv -b biases.keras_mnist_mlp.2.csv --input-shape=16  -f softmax"
+layer0="../layer full -w weights.keras_mnist_mlp.0.csv -b biases.keras_mnist_mlp.0.csv --input-shape=784 -f sigmoid"
+layer1="../layer full -w weights.keras_mnist_mlp.1.csv -b biases.keras_mnist_mlp.1.csv --input-shape=32  -f relu"
+layer2="../layer full -w weights.keras_mnist_mlp.2.csv -b biases.keras_mnist_mlp.2.csv --input-shape=16  -f softmax"
 
 # Layer 0 tests
 echo "Testing layer 0: $layer0"
