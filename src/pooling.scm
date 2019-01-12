@@ -1,13 +1,8 @@
 (declare (unit pooling)
-         (uses core options vectors))
-
-(define (poolings p)
-  (cond ((equal? p "max") max)
-        ;; TODO: raise error
-        (else #f)))
+         (uses core functions options vectors))
 
 ;; TODO: implement padding
-(define (pool v input-shape filter-shape stride)
+(define (pool v input-shape filter-shape stride f)
   (let* ((input-height (car input-shape))
          (input-width (cadr input-shape))
          ;; Input shape must be of three dimensions
@@ -18,7 +13,7 @@
          (output-height (+ (/ (- input-height filter-height) stride) 1))
          (output-width (+ (/ (- input-width filter-width) stride) 1))
          (output-size (* output-height output-width input-depth))
-         (output (make-f64vector output-size 0))) ;; TODO: don't need to initialize to zeros
+         (output (make-f64vector output-size)))
     ;; To start, pool for first field at 0,0
     (let outer ((i 0)
                 (j 0)
@@ -35,12 +30,10 @@
                            (col 0)
                            (vals '()))
                  (cond ((>= row filter-height)
-                        ;; TODO: use selected pooling function
                         (begin
-                          (f64vector-set! output offset (apply max vals))
+                          (f64vector-set! output offset (f vals))
                           (outer i (+ j 1) k)))
                        ((>= col filter-width) (inner (+ row 1) 0 vals))
-                       ;; TODO: stride needs to be applied internally to field, here!
                        (else (let ((index (+ ;; row offset
                                            (* (+ (* i stride) row) input-width input-depth)
                                            ;; col offset
@@ -52,7 +45,7 @@
 (define (pooling options-lookup)
   (let* ((input-shape (read-shape (options-lookup input-shape-option)))
          (filter-shape (read-shape (options-lookup filter-shape-option)))
-         (p (poolings (options-lookup function-option)))
+         (f (poolings (options-lookup function-option)))
          (stride (options-lookup stride-option 1 string->number)))
     (read-input
      (lambda (x)

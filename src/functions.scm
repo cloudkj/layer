@@ -46,3 +46,18 @@
           ((equal? name "softmax") softmax!)
           ;; Identity function
           (else (lambda (v k) v)))))
+
+;;; Pooling functions
+
+(define (average vals)
+  (let ((sum-count (fold (lambda (x sum-count)
+                           (cons (+ x (car sum-count))
+                                 (+ 1 (cdr sum-count))))
+                         (cons 0 0)
+                         vals)))
+    (/ (car sum-count) (cdr sum-count))))
+
+(define (poolings name)
+  (cond ((equal? name "max") (lambda (vals) (apply max vals)))
+        ((equal? name "avg") average)
+        (else #f)))

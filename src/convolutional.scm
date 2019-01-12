@@ -55,15 +55,6 @@
                          (copy-vector! c output offset)
                          (inner (+ row 1))))))))))))
 
-;; Copies all values in `from` and sets starting at offset index in `to`
-(define (copy-vector! from to offset)
-  (let loop ((i 0))
-    (if (>= i (f64vector-length from))
-        to
-        (begin
-          (f64vector-set! to (+ offset i) (f64vector-ref from i))
-          (loop (+ i 1))))))
-
 (define (convolve xcols wrows input-shape filter-height filter-width num-filters bias?)
   ;; TODO: add padding/stride
   (let* ((input-height (car input-shape))

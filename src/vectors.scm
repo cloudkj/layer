@@ -4,6 +4,17 @@
 
 ;;; Vectors
 
+;; Copies all values in src into dest starting at offset index
+(define (copy-vector! src dest offset)
+  (let ((n (f64vector-length src))
+        (m (f64vector-length dest)))
+    (let loop ((i 0))
+      (cond ((>= i n) dest)
+            ((>= (+ offset i) m) dest)
+            (else (begin
+                    (f64vector-set! dest (+ offset i) (f64vector-ref src i))
+                    (loop (+ i 1))))))))
+
 ;; Creates and initializes a vector of size len with a list of values
 (define (create-f64vector values len)
   (let loop ((v (make-f64vector len))

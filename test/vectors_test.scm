@@ -5,6 +5,19 @@
 
 (define (*2 x) (* 2 x))
 
+(check (copy-vector! (f64vector 1 2 3) (f64vector 7 7 7 7 7) 0)
+       =>
+       (f64vector 1 2 3 7 7))
+(check (copy-vector! (f64vector 1 2 3) (f64vector 7 7 7 7 7) 2)
+       =>
+       (f64vector 7 7 1 2 3))
+(check (copy-vector! (f64vector 1 2 3) (f64vector 7 7 7 7 7) 4)
+       =>
+       (f64vector 7 7 7 7 1))
+(check (copy-vector! (f64vector 1 2 3) (f64vector 7 7 7 7 7) 6)
+       =>
+       (f64vector 7 7 7 7 7))
+
 (check (create-f64vector '(1 2 3) 3) => (f64vector 1 2 3))
 (check (create-f64vector '(1 2 3) 2) => (f64vector 1 2))
 
