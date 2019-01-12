@@ -1,6 +1,7 @@
 (require-extension srfi-4 srfi-78)
 
 (include "test/common.scm")
+(include "src/vectors.scm")
 (include "src/functions.scm")
 
 (check (relu 0) => 0)

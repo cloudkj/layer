@@ -1,8 +1,8 @@
 (require-extension srfi-78)
 
 (include "test/common.scm")
-(include "src/core.scm")
-(include "src/dense.scm")
+(include "src/vectors.scm")
+(include "src/full.scm")
 
 (check (create-input '(0.05 0.1) '(2) #f) => (f64vector 0.05 0.1))
 (check (create-input '(0.05 0.1) '(2) #t) => (f64vector 1 0.05 0.1))
