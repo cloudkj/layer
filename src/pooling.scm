@@ -50,5 +50,5 @@
     (read-input
      (lambda (x)
        (let* ((x (create-f64vector x (length x)))
-              (output (pool x input-shape filter-shape stride)))
+              (output (pool x input-shape filter-shape stride f)))
          (print-output output ","))))))

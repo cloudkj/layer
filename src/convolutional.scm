@@ -21,7 +21,7 @@
          ;; Number of values in each field, plus bias
          (field-size (+ bias (* field-height field-width pixel-size)))
          (output-size (* output-height output-width field-size))
-         (output (make-f64vector output-size 0))) ;; TODO: don't need to initialize to zeros
+         (output (make-f64vector output-size)))
     ;; i, j are offsets into the input matrix for each field
     (let outer ((i 0)
                 (j 0))
