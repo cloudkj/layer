@@ -2,6 +2,24 @@
 
 (use srfi-13)
 
+;;; Helpers
+
+;; Returns true if the given option spec is for a required parameter.
+(define (required? option)
+  (equal? (caddr option) '(required #t)))
+
+;; Returns a lookup function for looking up option values by the option
+;; definition. The lookup function optionally takes a function to apply to the
+;; value of the option, if it exists. If the option does not exist, the lookup
+;; will return a default value (if supplied), or false.
+(define (make-options-lookup options)
+  (lambda (option-definition #!optional default f)
+    (let* ((key (car option-definition))
+           (val (assoc key options)))
+      (cond ((not val) default)
+            ((not f) (cdr val))
+            (else (f (cdr val)))))))
+
 ;;; Definitions of required parameters
 
 (define filter-shape-option
@@ -30,8 +48,11 @@
 
 (define (sort-options options)
   (sort options
-        (lambda (a b) (string< (symbol->string (car a))
-                               (symbol->string (car b))))))
+        (lambda (a b)
+          (if (and (required? a) (required? b))
+              (string< (symbol->string (car a))
+                       (symbol->string (car b)))
+              (required? a)))))
 
 (define layer-options
   (list input-shape-option))
@@ -54,17 +75,3 @@
                         (list filter-shape-option
                               function-option
                               stride-option))))
-
-;;; Helpers
-
-;; Returns a lookup function for looking up option values by the option
-;; definition. The lookup function optionally takes a function to apply to the
-;; value of the option, if it exists. If the option does not exist, the lookup
-;; will return a default value (if supplied), or false.
-(define (make-options-lookup options)
-  (lambda (option-definition #!optional default f)
-    (let* ((key (car option-definition))
-           (val (assoc key options)))
-      (cond ((not val) default)
-            ((not f) (cdr val))
-            (else (f (cdr val)))))))
