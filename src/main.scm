@@ -1,6 +1,6 @@
 (declare (uses functions options util convolutional full pooling))
 
-(use getopt-long)
+(use getopt-long srfi-13)
 
 (define prog-name "layer")
 
@@ -18,14 +18,22 @@
          (desc (cadr def))
          (grammar (caddr def)))
     (format #t "Usage: ~A ~A [OPTIONS]\n\n~A.\n\n" prog-name command desc)
-    (print "Options:")
-    (print (usage grammar))))
+    (print "Required parameters:\n")
+    (print (usage (filter required? grammar)))
+    (print "Optional:\n")
+    (print (usage (filter (lambda (o) (not (required? o))) grammar)))))
 
 (define (print-program-usage #!optional error)
   (when error (begin (print error) (newline)))
   (format #t "Usage: ~A COMMAND [OPTIONS]\n\n~A.\n\n" prog-name prog-desc)
-  (print "Commands:")
-  (for-each (lambda (c) (print "  " (car c) "\t\t" (cadr c))) commands))
+  (print "Commands:\n")
+  (let ((max-command-width (apply max (map (compose string-length car) commands))))
+    (for-each (lambda (c)
+                (let* ((spaces (+ 4 (- max-command-width (string-length (car c)))))
+                       (sep (make-string spaces #\ )))
+                  (print "  " (car c) sep (cadr c))))
+              commands))
+  (format #t "\nSee '~A COMMAND' to read more about a specific command.\n" prog-name))
 
 (define (parse-options command args grammar)
   (handle-exceptions
