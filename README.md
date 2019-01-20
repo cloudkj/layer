@@ -5,9 +5,12 @@ modern neural network operations can be represented as sequential,
 unidirectional streams of data processed by pipelines of [filters](https://en.wikipedia.org/wiki/Filter_(software)).
 The computations at each layer in these neural networks are equivalent to an
 invocation of the `layer` program, and multiple invocations can be chained
-together to represent the entirety of such networks. For example, a neural
-network with two fully-connected layers can be invoked with
-`cat input | layer full -w w.1 --input-shape=2 -f tanh | layer full -w w.2 --input-shape=3 -f sigmoid`
+together to represent the entirety of such networks.
+
+For example, performing inference on a neural network with two fully-connected
+layers might look something like this:
+
+    cat input | layer full -w w.1 --input-shape=2 -f tanh | layer full -w w.2 --input-shape=3 -f sigmoid
 
 `layer` applies the Unix philosophy to neural network inference. Each type of
 a neural network layer is a distinct subcommand. Simple text streams of
@@ -62,6 +65,8 @@ pipelines.
 Input values, weights and biases for parameterized layers, and output values
 are all read and written in [row-major order](https://en.wikipedia.org/wiki/Row-_and_column-major_order),
 based on the shape parameters specified for each layer.
+
+`layer` is implemented in [CHICKEN Scheme](https://www.call-cc.org/).
 
 ## License
 
