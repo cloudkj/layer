@@ -20,7 +20,7 @@ deploy:
 	csc -deploy $(SRC_DIR)/*.scm -o $(BUILD_DIR)/$@
 	chicken-install -deploy -p $(BUILD_DIR)/$@ $(EGG_DEPS)
 	rm -f $(BUILD_DIR)/$@/*.setup-info
-	cp $(DIST_DIR)/install.sh $(BUILD_DIR)/$@
+	cp README.md LICENSE $(DIST_DIR)/install.sh $(BUILD_DIR)/$@
 	mv $(BUILD_DIR)/$@/$@ $(BUILD_DIR)/$@/$(PROGRAM_NAME)
 	mv $(BUILD_DIR)/$@ $(BUILD_DIR)/$(ARTIFACT)
 	tar czf $(BUILD_DIR)/$(ARTIFACT).tar.gz -C $(BUILD_DIR) $(ARTIFACT)
