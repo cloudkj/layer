@@ -45,12 +45,12 @@ Requirements: BLAS 3.6.0+
 
 1. Download a [release](https://github.com/cloudkj/layer/releases)
 2. Install BLAS 3.6.0+
-  * On Debian-based systems: `apt-get install -y libblas3
+  * On Debian-based systems: `apt-get install -y libblas3`
   * On RPM-based system: `yum install -y blas`
   * On macOS 10.3+, BLAS is pre-installed as part of the
     [Accelerate framework](https://developer.apple.com/documentation/accelerate/blas)
 3. Unzip the release and run `[sudo] ./install.sh`, or manually relocate the
-   binaries to path of your choice.
+   binaries to the path of your choice.
 
 ## About
 
