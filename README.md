@@ -21,6 +21,15 @@ emits the resulting output numeric values.
 
 ## Usage
 
+Example: a convolutional neural network for [CIFAR-10](https://en.wikipedia.org/wiki/CIFAR-10).
+
+```shell
+$ cat cifar10_x.csv \
+    | layer convolutional -w w0.csv -b b0.csv --input-shape=32,32,3  --filter-shape=3,3 --num-filters=32 -f relu \
+    | layer convolutional -w w1.csv -b b1.csv --input-shape=30,30,32 --filter-shape=3,3 --num-filters=32 -f relu \
+    | layer pooling --input-shape=28,28,32 --filter-shape=2,2 --stride=2 -f max
+```
+
 Example: a multi-layer perceptron for XOR.
 
 ```shell
