@@ -1,8 +1,8 @@
 (declare (unit pooling)
          (uses core functions options vectors))
 
-;; TODO: implement padding
 (define (pool v input-shape filter-shape stride f)
+  ;; TODO: implement padding
   (let* ((input-height (car input-shape))
          (input-width (cadr input-shape))
          ;; Input shape must be of three dimensions
@@ -14,7 +14,6 @@
          (output-width (+ (/ (- input-width filter-width) stride) 1))
          (output-size (* output-height output-width input-depth))
          (output (make-f64vector output-size)))
-    ;; To start, pool for first field at 0,0
     (let outer ((i 0)
                 (j 0)
                 (k 0))

@@ -4,7 +4,7 @@
 
 ;;; Logging
 
-;; Logs a varadic list of values by printing to stderr
+;; Logs a variadic list of values by printing to stderr
 (define (util-log . args)
   (let ((port (current-error-port)))
     (let loop ((a args))

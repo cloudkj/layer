@@ -3,12 +3,6 @@
 
 (use blas)
 
-;; For input shape H x W, field shape FH x FW, padding P, stride S, output shape is:
-;;
-;;   output height = (H - FH + 2P) / S + 1
-;;   output width  = (W - FW + 2P) / S + 1
-;;
-;; Total number of fields = output height * output width
 (define (im2col v input-shape field-height field-width bias?)
   (let* ((bias (if bias? 1 0))
          (input-height (car input-shape))
@@ -22,7 +16,6 @@
          (field-size (+ bias (* field-height field-width pixel-size)))
          (output-size (* output-height output-width field-size))
          (output (make-f64vector output-size)))
-    ;; i, j are offsets into the input matrix for each field
     (let outer ((i 0)
                 (j 0))
       (cond ((>= i output-height) output)
